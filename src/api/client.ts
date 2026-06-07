@@ -1,65 +1,107 @@
 import axios from 'axios';
-import { Device, Alarm, Organization, FleetSummary, BatteryHealthBucket, MaintenanceItem } from './types';
 import {
-  mockDevices,
-  mockAlarms,
-  mockOrganizations,
-  mockFleetSummary,
-  mockBatteryHealthData,
-  mockMaintenanceItems,
+  Organization, Device, PagedResponse, Alarm,
+  AlarmsSummaryReport, DeviceHealthReport, PowerUsageReport,
+  SyncStatusResponse,
+} from './types';
+import {
+  mockOrganizations, mockDevicesPage, mockAlarms,
+  mockAlarmsSummary, mockDeviceHealth, mockPowerUsage, mockSyncStatus,
 } from './mockData';
 
 const BASE_URL = process.env.REACT_APP_API_URL || '';
 const USE_MOCK = !BASE_URL;
 
-const apiClient = axios.create({
-  baseURL: BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-});
+const api = axios.create({ baseURL: BASE_URL, headers: { 'Content-Type': 'application/json' } });
 
+// ── Organizations ─────────────────────────────────────────────────────────────
 export async function fetchOrganizations(): Promise<Organization[]> {
   if (USE_MOCK) return mockOrganizations;
-  const { data } = await apiClient.get<Organization[]>('/api/organizations');
+  const { data } = await api.get<Organization[]>('/api/organizations');
   return data;
 }
 
-export async function fetchDevices(organizationId?: string): Promise<Device[]> {
+// ── Devices ───────────────────────────────────────────────────────────────────
+export interface DeviceFilters {
+  organization_id: string;
+  location_id?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export async function fetchDevices(filters: DeviceFilters): Promise<PagedResponse<Device>> {
+  if (USE_MOCK) return mockDevicesPage(filters.organization_id, filters.limit, filters.offset);
+  const { data } = await api.get<PagedResponse<Device>>('/api/devices', { params: filters });
+  return data;
+}
+
+// ── Alarms ────────────────────────────────────────────────────────────────────
+export interface AlarmFilters {
+  organization_id: string;
+  severity?: 'CRITICAL' | 'WARNING' | 'INFO';
+  status?: 'active' | 'cleared';
+  limit?: number;
+  offset?: number;
+}
+
+export async function fetchAlarms(filters: AlarmFilters): Promise<PagedResponse<Alarm>> {
   if (USE_MOCK) {
-    return organizationId && organizationId !== 'org-1'
-      ? mockDevices.filter((d) => d.organizationId === organizationId)
-      : mockDevices;
+    let items = [...mockAlarms];
+    if (filters.severity) items = items.filter(a => a.severity === filters.severity);
+    if (filters.status === 'active') items = items.filter(a => a.cleared_time === null);
+    if (filters.status === 'cleared') items = items.filter(a => a.cleared_time !== null);
+    const offset = filters.offset ?? 0;
+    const limit = filters.limit ?? 50;
+    return { items: items.slice(offset, offset + limit), total: items.length, limit, offset };
   }
-  const params: Record<string, string> = {};
-  if (organizationId) params.organization_id = organizationId;
-  const { data } = await apiClient.get<Device[]>('/api/devices', { params });
+  const { data } = await api.get<PagedResponse<Alarm>>('/api/alarms', { params: filters });
   return data;
 }
 
-export async function fetchAlarms(acknowledged?: boolean): Promise<Alarm[]> {
-  if (USE_MOCK) {
-    return acknowledged !== undefined
-      ? mockAlarms.filter((a) => a.acknowledged === acknowledged)
-      : mockAlarms;
-  }
-  const params = acknowledged !== undefined ? { acknowledged } : {};
-  const { data } = await apiClient.get<Alarm[]>('/api/alarms', { params });
+// ── Reports ───────────────────────────────────────────────────────────────────
+export async function fetchAlarmsSummary(
+  organization_id: string, timeframe_hours = 24
+): Promise<AlarmsSummaryReport> {
+  if (USE_MOCK) return mockAlarmsSummary(organization_id);
+  const { data } = await api.get<AlarmsSummaryReport>('/api/reports/alarms-summary', {
+    params: { organization_id, timeframe_hours },
+  });
   return data;
 }
 
-export async function fetchFleetSummary(): Promise<FleetSummary> {
-  if (USE_MOCK) return mockFleetSummary;
-  const { data } = await apiClient.get<FleetSummary>('/api/reports/device-health');
+export async function fetchDeviceHealth(organization_id: string): Promise<DeviceHealthReport> {
+  if (USE_MOCK) return mockDeviceHealth(organization_id);
+  const { data } = await api.get<DeviceHealthReport>('/api/reports/device-health', {
+    params: { organization_id },
+  });
   return data;
 }
 
-export async function fetchBatteryHealthDistribution(): Promise<BatteryHealthBucket[]> {
-  if (USE_MOCK) return mockBatteryHealthData;
-  const { data } = await apiClient.get<BatteryHealthBucket[]>('/api/reports/battery-health');
+export async function fetchPowerUsage(
+  organization_id: string, timeframe_hours = 24
+): Promise<PowerUsageReport> {
+  if (USE_MOCK) return mockPowerUsage(organization_id);
+  const { data } = await api.get<PowerUsageReport>('/api/reports/power-usage', {
+    params: { organization_id, timeframe_hours },
+  });
   return data;
 }
 
-export async function fetchMaintenanceItems(): Promise<MaintenanceItem[]> {
-  if (USE_MOCK) return mockMaintenanceItems;
-  const { data } = await apiClient.get<MaintenanceItem[]>('/api/reports/maintenance');
+// ── Sync ──────────────────────────────────────────────────────────────────────
+export async function fetchSyncStatus(): Promise<SyncStatusResponse> {
+  if (USE_MOCK) return mockSyncStatus;
+  const { data } = await api.get<SyncStatusResponse>('/api/sync/status');
+  return data;
+}
+
+export async function triggerBootstrap(): Promise<{ status: string }> {
+  if (USE_MOCK) return { status: 'bootstrap_started' };
+  const { data } = await api.post<{ status: string }>('/api/sync/bootstrap');
+  return data;
+}
+
+export async function triggerIncrementalSync(org_id: string): Promise<{ status: string }> {
+  if (USE_MOCK) return { status: 'incremental_sync_started' };
+  const { data } = await api.post<{ status: string }>(`/api/sync/incremental/${org_id}`);
   return data;
 }

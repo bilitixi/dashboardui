@@ -1,14 +1,60 @@
-import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import {
+  fetchAlarmsSummary, fetchDeviceHealth, fetchPowerUsage,
+  fetchSyncStatus, triggerBootstrap, triggerIncrementalSync,
+} from '../api/client';
+import {
+  AlarmsSummaryReport, DeviceHealthReport, PowerUsageReport, SyncStatusResponse,
+} from '../api/types';
 
-export function useReports() {
-  const [isGenerating, setIsGenerating] = useState(false);
+export function useAlarmsSummary(orgId: string, hours = 24): UseQueryResult<AlarmsSummaryReport> {
+  return useQuery<AlarmsSummaryReport>({
+    queryKey: ['alarmsSummary', orgId, hours],
+    queryFn: () => fetchAlarmsSummary(orgId, hours),
+    staleTime: 60000,
+    refetchInterval: 60000,
+  });
+}
 
-  const generateReport = async (type: string) => {
-    setIsGenerating(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsGenerating(false);
-    alert(`Report "${type}" generated successfully.`);
-  };
+export function useDeviceHealth(orgId: string): UseQueryResult<DeviceHealthReport> {
+  return useQuery<DeviceHealthReport>({
+    queryKey: ['deviceHealth', orgId],
+    queryFn: () => fetchDeviceHealth(orgId),
+    staleTime: 30000,
+    refetchInterval: 30000,
+  });
+}
 
-  return { isGenerating, generateReport };
+export function usePowerUsage(orgId: string, hours = 24): UseQueryResult<PowerUsageReport> {
+  return useQuery<PowerUsageReport>({
+    queryKey: ['powerUsage', orgId, hours],
+    queryFn: () => fetchPowerUsage(orgId, hours),
+    staleTime: 60000,
+    refetchInterval: 60000,
+  });
+}
+
+export function useSyncStatus(): UseQueryResult<SyncStatusResponse> {
+  return useQuery<SyncStatusResponse>({
+    queryKey: ['syncStatus'],
+    queryFn: fetchSyncStatus,
+    staleTime: 30000,
+    refetchInterval: 30000,
+  });
+}
+
+export function useBootstrap() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: triggerBootstrap,
+    onSuccess: () => qc.invalidateQueries(),
+  });
+}
+
+export function useIncrementalSync() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: triggerIncrementalSync,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['syncStatus'] }),
+  });
 }

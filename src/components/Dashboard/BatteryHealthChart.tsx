@@ -1,51 +1,70 @@
 import React from 'react';
-import { useBatteryHealthDistribution } from '../../hooks/useDevices';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, Cell,
+} from 'recharts';
+import { useAlarmsSummary } from '../../hooks/useReports';
 
-export function BatteryHealthChart() {
-  const { data = [], isLoading } = useBatteryHealthDistribution();
-  const maxCount = Math.max(...data.map((d) => d.count), 1);
+interface Props { orgId: string; timeframeHours?: number; }
+
+const COLORS: Record<string, string> = {
+  CRITICAL: '#ef4444',
+  WARNING:  '#f59e0b',
+  INFO:     '#3b82f6',
+};
+
+export function AlarmsSummaryChart({ orgId, timeframeHours = 24 }: Props) {
+  const { data, isLoading } = useAlarmsSummary(orgId, timeframeHours);
+
+  const chartData = (data?.summary ?? []).map(s => ({
+    severity: s.severity,
+    Active: s.active,
+    Cleared: s.total - s.active,
+    total: s.total,
+  }));
 
   return (
     <div style={{ backgroundColor: '#1a2235', border: '1px solid #1e2d45' }} className="rounded-xl p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <span className="text-white font-semibold text-base">Battery health distribution</span>
-        <span style={{ color: '#64748b' }} className="text-sm">
-          {data.reduce((s, d) => s + d.count, 0)} units · %
-        </span>
+      <div className="flex items-center justify-between mb-5">
+        <span className="text-white font-semibold text-base">Alarms by severity</span>
+        <span style={{ color: '#64748b' }} className="text-xs">{timeframeHours}h window</span>
       </div>
 
-      {/* Bars */}
       {isLoading ? (
-        <div className="space-y-4">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} style={{ backgroundColor: '#253047' }} className="h-6 rounded animate-pulse" />
-          ))}
-        </div>
+        <div style={{ backgroundColor: '#253047' }} className="h-48 rounded animate-pulse" />
       ) : (
-        <div className="space-y-4">
-          {data.map((bucket) => {
-            const pct = (bucket.count / maxCount) * 100;
-            return (
-              <div key={bucket.range} className="flex items-center gap-4">
-                {/* Label */}
-                <div style={{ color: '#94a3b8', minWidth: 110 }} className="text-sm text-right">
-                  {bucket.range}
-                </div>
-                {/* Bar track */}
-                <div style={{ backgroundColor: '#253047', flex: 1 }} className="rounded-full h-3 overflow-hidden">
-                  <div
-                    style={{ width: `${pct}%`, backgroundColor: bucket.color, transition: 'width 0.6s ease' }}
-                    className="h-full rounded-full"
-                  />
-                </div>
-                {/* Count */}
-                <div style={{ color: '#cbd5e1', minWidth: 28 }} className="text-sm text-right font-medium">
-                  {bucket.count}
-                </div>
-              </div>
-            );
-          })}
+        <ResponsiveContainer width="100%" height={210}>
+          <BarChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }} barSize={28}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#253047" vertical={false} />
+            <XAxis dataKey="severity" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <Tooltip
+              contentStyle={{ background: '#1a2235', border: '1px solid #2a3548', borderRadius: 8 }}
+              labelStyle={{ color: '#e5e7eb', fontWeight: 600 }}
+              itemStyle={{ color: '#94a3b8' }}
+            />
+            <Legend wrapperStyle={{ color: '#94a3b8', fontSize: 12 }} />
+            <Bar dataKey="Active" stackId="a" radius={[0, 0, 0, 0]}>
+              {chartData.map(entry => (
+                <Cell key={entry.severity} fill={COLORS[entry.severity] ?? '#64748b'} />
+              ))}
+            </Bar>
+            <Bar dataKey="Cleared" stackId="a" fill="#253047" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
+
+      {/* Summary pills */}
+      {!isLoading && (
+        <div className="flex gap-3 mt-4">
+          {(data?.summary ?? []).map(s => (
+            <div key={s.severity} style={{ backgroundColor: '#0f1520', border: `1px solid ${COLORS[s.severity]}33` }}
+              className="flex-1 rounded-lg p-3 text-center">
+              <div className="text-xs font-medium mb-1" style={{ color: COLORS[s.severity] }}>{s.severity}</div>
+              <div className="text-2xl font-bold text-white">{s.active}</div>
+              <div style={{ color: '#64748b' }} className="text-xs">active / {s.total} total</div>
+            </div>
+          ))}
         </div>
       )}
     </div>

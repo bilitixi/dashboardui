@@ -1,53 +1,80 @@
-import { Device, Alarm, Organization, FleetSummary, BatteryHealthBucket, MaintenanceItem } from './types';
+import {
+  Organization, Device, PagedResponse, Alarm,
+  AlarmsSummaryReport, DeviceHealthReport, PowerUsageReport,
+  SyncStatusResponse,
+} from './types';
+
+const now = new Date().toISOString();
+const hoursAgo = (h: number) => new Date(Date.now() - h * 3600000).toISOString();
 
 export const mockOrganizations: Organization[] = [
-  { id: 'org-1', name: 'All Villages', deviceCount: 93 },
-  { id: 'org-2', name: 'Auckland-East', deviceCount: 28 },
-  { id: 'org-3', name: 'Highlands', deviceCount: 22 },
-  { id: 'org-4', name: 'Hibiscus Coast', deviceCount: 18 },
-  { id: 'org-5', name: 'Northshore', deviceCount: 15 },
-  { id: 'org-6', name: 'Westgate', deviceCount: 10 },
+  { id: 'org-1', label: 'Auckland Villages', address: '1 Queen St, Auckland', inventory_object_type: 'organization', updated_at: now },
+  { id: 'org-2', label: 'Highlands Region', address: '5 Highland Rd, Hamilton', inventory_object_type: 'organization', updated_at: now },
+  { id: 'org-3', label: 'Hibiscus Coast', address: '12 Coast Ave, Whangaparaoa', inventory_object_type: 'organization', updated_at: now },
 ];
 
 export const mockDevices: Device[] = [
-  { id: 'd-001', name: 'UPS-UNIT-42', site: 'Auckland-East', model: 'APC Smart-UPS AP9620RM', serialNumber: 'SN-10001', assetTag: 'AE-UPS-0001', status: 'Degraded', battery: 91, load: 38, runtime: 34, organizationId: 'org-2' },
-  { id: 'd-002', name: 'UPS-UNIT-07', site: 'Auckland-East', model: 'APC Smart-UPS 3000', serialNumber: 'SN-10002', assetTag: 'AE-UPS-0007', status: 'Healthy', battery: 98, load: 42, runtime: 55, organizationId: 'org-2' },
-  { id: 'd-003', name: 'UPS-UNIT-15', site: 'Highlands', model: 'APC Smart-UPS AP9630', serialNumber: 'SN-20001', assetTag: 'HL-UPS-0015', status: 'Healthy', battery: 96, load: 51, runtime: 48, organizationId: 'org-3' },
-  { id: 'd-004', name: 'UPS-UNIT-23', site: 'Highlands', model: 'APC Smart-UPS 1500', serialNumber: 'SN-20002', assetTag: 'HL-UPS-0023', status: 'Degraded', battery: 77, load: 66, runtime: 22, organizationId: 'org-3' },
-  { id: 'd-005', name: 'UPS-UNIT-31', site: 'Hibiscus Coast', model: 'APC Smart-UPS AP9620RM', serialNumber: 'SN-30001', assetTag: 'HC-UPS-0031', status: 'Healthy', battery: 99, load: 35, runtime: 62, organizationId: 'org-4' },
-  { id: 'd-006', name: 'UPS-UNIT-55', site: 'Hibiscus Coast', model: 'APC Smart-UPS 3000', serialNumber: 'SN-30002', assetTag: 'HC-UPS-0055', status: 'Healthy', battery: 95, load: 44, runtime: 50, organizationId: 'org-4' },
-  { id: 'd-007', name: 'UPS-UNIT-68', site: 'Northshore', model: 'APC Smart-UPS AP9630', serialNumber: 'SN-40001', assetTag: 'NS-UPS-0068', status: 'Healthy', battery: 93, load: 29, runtime: 71, organizationId: 'org-5' },
-  { id: 'd-008', name: 'UPS-UNIT-74', site: 'Westgate', model: 'APC Smart-UPS 1500', serialNumber: 'SN-50001', assetTag: 'WG-UPS-0074', status: 'Critical', battery: 61, load: 82, runtime: 11, organizationId: 'org-6' },
-  { id: 'd-009', name: 'UPS-UNIT-12', site: 'Auckland-East', model: 'APC Smart-UPS 3000', serialNumber: 'SN-10003', assetTag: 'AE-UPS-0012', status: 'Healthy', battery: 97, load: 40, runtime: 58, organizationId: 'org-2' },
-  { id: 'd-010', name: 'UPS-UNIT-88', site: 'Northshore', model: 'APC Smart-UPS AP9620RM', serialNumber: 'SN-40002', assetTag: 'NS-UPS-0088', status: 'Healthy', battery: 100, load: 33, runtime: 67, organizationId: 'org-5' },
+  { id: 'd-001', organization_id: 'org-1', location_id: 'loc-1', parent_id: null, label: 'UPS-UNIT-42', inventory_object_type: 'device', model_name: 'APC Smart-UPS AP9620RM', device_note: null, serial_number: 'SN-10001', hostname: 'ups-unit-42', firmware_version: '1.4.2', hardware_version: '2.0', part_number: 'AP9620RM', manufacturer: 'APC', ipv4_addresses: ['192.168.1.101'], ipv6_addresses: [], mac_addresses: ['00:1A:2B:3C:4D:5E'], gateway_ids: [], updated_at: hoursAgo(1) },
+  { id: 'd-002', organization_id: 'org-1', location_id: 'loc-1', parent_id: null, label: 'UPS-UNIT-07', inventory_object_type: 'device', model_name: 'APC Smart-UPS 3000', device_note: 'Server room primary', serial_number: 'SN-10002', hostname: 'ups-unit-07', firmware_version: '1.4.0', hardware_version: '2.0', part_number: 'SU3000', manufacturer: 'APC', ipv4_addresses: ['192.168.1.102'], ipv6_addresses: [], mac_addresses: ['00:1A:2B:3C:4D:5F'], gateway_ids: [], updated_at: hoursAgo(2) },
+  { id: 'd-003', organization_id: 'org-1', location_id: 'loc-2', parent_id: null, label: 'UPS-UNIT-15', inventory_object_type: 'device', model_name: 'APC Smart-UPS AP9630', device_note: null, serial_number: 'SN-10003', hostname: 'ups-unit-15', firmware_version: '1.3.9', hardware_version: '1.5', part_number: 'AP9630', manufacturer: 'APC', ipv4_addresses: ['192.168.1.103'], ipv6_addresses: [], mac_addresses: ['00:1A:2B:3C:4D:60'], gateway_ids: [], updated_at: hoursAgo(3) },
+  { id: 'd-004', organization_id: 'org-2', location_id: 'loc-3', parent_id: null, label: 'UPS-UNIT-23', inventory_object_type: 'device', model_name: 'APC Smart-UPS 1500', device_note: 'Network closet', serial_number: 'SN-20001', hostname: 'ups-unit-23', firmware_version: '1.4.1', hardware_version: '2.0', part_number: 'SU1500', manufacturer: 'APC', ipv4_addresses: ['10.0.1.50'], ipv6_addresses: [], mac_addresses: ['00:AA:BB:CC:DD:01'], gateway_ids: [], updated_at: hoursAgo(1) },
+  { id: 'd-005', organization_id: 'org-2', location_id: 'loc-3', parent_id: null, label: 'UPS-UNIT-31', inventory_object_type: 'device', model_name: 'APC Smart-UPS AP9620RM', device_note: null, serial_number: 'SN-20002', hostname: 'ups-unit-31', firmware_version: '1.4.2', hardware_version: '2.0', part_number: 'AP9620RM', manufacturer: 'APC', ipv4_addresses: ['10.0.1.51'], ipv6_addresses: [], mac_addresses: ['00:AA:BB:CC:DD:02'], gateway_ids: [], updated_at: hoursAgo(4) },
+  { id: 'd-006', organization_id: 'org-3', location_id: 'loc-4', parent_id: null, label: 'UPS-UNIT-55', inventory_object_type: 'device', model_name: 'APC Smart-UPS 3000', device_note: null, serial_number: 'SN-30001', hostname: 'ups-unit-55', firmware_version: '1.4.2', hardware_version: '2.0', part_number: 'SU3000', manufacturer: 'APC', ipv4_addresses: ['172.16.0.10'], ipv6_addresses: [], mac_addresses: ['00:FF:EE:DD:CC:01'], gateway_ids: [], updated_at: hoursAgo(2) },
+  { id: 'd-007', organization_id: 'org-3', location_id: 'loc-4', parent_id: null, label: 'UPS-UNIT-68', inventory_object_type: 'device', model_name: 'APC Smart-UPS 1500', device_note: 'Legacy unit', serial_number: 'SN-30002', hostname: 'ups-unit-68', firmware_version: '1.3.8', hardware_version: '1.5', part_number: 'SU1500', manufacturer: 'APC', ipv4_addresses: ['172.16.0.11'], ipv6_addresses: [], mac_addresses: ['00:FF:EE:DD:CC:02'], gateway_ids: [], updated_at: hoursAgo(6) },
+  { id: 'd-008', organization_id: 'org-1', location_id: 'loc-2', parent_id: null, label: 'UPS-UNIT-74', inventory_object_type: 'device', model_name: 'APC Smart-UPS AP9630', device_note: null, serial_number: 'SN-10004', hostname: 'ups-unit-74', firmware_version: '1.4.2', hardware_version: '2.0', part_number: 'AP9630', manufacturer: 'APC', ipv4_addresses: ['192.168.1.104'], ipv6_addresses: [], mac_addresses: ['00:1A:2B:3C:4D:61'], gateway_ids: [], updated_at: hoursAgo(1) },
 ];
 
-export const mockAlarms: Alarm[] = [
-  { id: 'a-001', deviceId: 'd-001', deviceName: 'UPS-UNIT-42', type: 'warning', message: 'Battery health below 95%', timestamp: new Date(Date.now() - 300000).toISOString(), acknowledged: false },
-  { id: 'a-002', deviceId: 'd-004', deviceName: 'UPS-UNIT-23', type: 'warning', message: 'High load detected', timestamp: new Date(Date.now() - 3600000).toISOString(), acknowledged: false },
-  { id: 'a-003', deviceId: 'd-008', deviceName: 'UPS-UNIT-74', type: 'critical', message: 'Battery critically low', timestamp: new Date(Date.now() - 600000).toISOString(), acknowledged: false },
-];
-
-export const mockFleetSummary: FleetSummary = {
-  totalDevices: 93,
-  villages: 37,
-  healthyDevices: 87,
-  healthyPercent: 94,
-  degradedDevices: 6,
-  avgLoad: 45,
-  peakLoad: 61,
-  avgRuntime: 47,
+export const mockDevicesPage = (orgId?: string, limit = 50, offset = 0): PagedResponse<Device> => {
+  const filtered = orgId ? mockDevices.filter(d => d.organization_id === orgId) : mockDevices;
+  return { items: filtered.slice(offset, offset + limit), total: filtered.length, limit, offset };
 };
 
-export const mockBatteryHealthData: BatteryHealthBucket[] = [
-  { range: '95-100%', count: 58, color: '#22c55e', max: 58 },
-  { range: '90-95%',  count: 29, color: '#4ade80', max: 58 },
-  { range: '80-90%',  count: 4,  color: '#f59e0b', max: 58 },
-  { range: '<80% degraded', count: 2, color: '#ef4444', max: 58 },
+export const mockAlarms: Alarm[] = [
+  { id: 'a-001', device_id: 'd-001', label: 'Battery Low', message: 'Battery charge below 20%', severity: 'CRITICAL', activated_time: hoursAgo(2), cleared_time: null, alarm_reactivation_count: 2, muted_when_processed: false, updated_at: hoursAgo(2) },
+  { id: 'a-002', device_id: 'd-004', label: 'High Load', message: 'Output load exceeded 80%', severity: 'CRITICAL', activated_time: hoursAgo(5), cleared_time: null, alarm_reactivation_count: 0, muted_when_processed: false, updated_at: hoursAgo(5) },
+  { id: 'a-003', device_id: 'd-003', label: 'Battery Aging', message: 'Battery age exceeds recommended service life', severity: 'WARNING', activated_time: hoursAgo(12), cleared_time: null, alarm_reactivation_count: 1, muted_when_processed: false, updated_at: hoursAgo(12) },
+  { id: 'a-004', device_id: 'd-007', label: 'Firmware Outdated', message: 'Firmware version 1.3.8 is outdated', severity: 'WARNING', activated_time: hoursAgo(24), cleared_time: null, alarm_reactivation_count: 0, muted_when_processed: true, updated_at: hoursAgo(24) },
+  { id: 'a-005', device_id: 'd-002', label: 'Input Voltage High', message: 'Input voltage above threshold', severity: 'WARNING', activated_time: hoursAgo(3), cleared_time: hoursAgo(1), alarm_reactivation_count: 0, muted_when_processed: false, updated_at: hoursAgo(1) },
+  { id: 'a-006', device_id: 'd-005', label: 'Temperature Warning', message: 'Internal temperature above 35°C', severity: 'INFO', activated_time: hoursAgo(8), cleared_time: hoursAgo(6), alarm_reactivation_count: 0, muted_when_processed: false, updated_at: hoursAgo(6) },
+  { id: 'a-007', device_id: 'd-006', label: 'Self-Test Passed', message: 'Scheduled self-test completed successfully', severity: 'INFO', activated_time: hoursAgo(18), cleared_time: hoursAgo(18), alarm_reactivation_count: 0, muted_when_processed: false, updated_at: hoursAgo(18) },
 ];
 
-export const mockMaintenanceItems: MaintenanceItem[] = [
-  { label: 'Battery replacement, 6 Smart-UPS units', site: 'Auckland-East, Highlands', timeframe: '~3 months', color: '#f59e0b' },
-  { label: 'UPS end-of-life refresh, 3 units', site: 'Hibiscus Coast', timeframe: '~5 months', color: '#f59e0b' },
-  { label: 'Firmware update, fleet wide', site: 'All villages', timeframe: '~6 months', color: '#3b82f6' },
-];
+export const mockAlarmsSummary = (orgId: string): AlarmsSummaryReport => ({
+  organization_id: orgId,
+  timeframe_hours: 24,
+  summary: [
+    { severity: 'CRITICAL', total: 10, active: 2 },
+    { severity: 'WARNING',  total: 25, active: 5 },
+    { severity: 'INFO',     total: 50, active: 0 },
+  ],
+});
+
+export const mockDeviceHealth = (orgId: string): DeviceHealthReport => ({
+  organization_id: orgId,
+  total_devices: mockDevices.filter(d => !orgId || d.organization_id === orgId).length || mockDevices.length,
+  active_alarms: mockAlarms.filter(a => a.cleared_time === null).length,
+});
+
+export const mockPowerUsage = (orgId: string): PowerUsageReport => ({
+  organization_id: orgId,
+  timeframe_hours: 24,
+  sensors: [
+    { name: 'Output Power',   unit: 'W',   avg: 1250.5, max: 2000.0, min: 800.0 },
+    { name: 'Input Voltage',  unit: 'V',   avg: 230.2,  max: 240.0,  min: 220.0 },
+    { name: 'Battery Charge', unit: '%',   avg: 87.4,   max: 100.0,  min: 61.0  },
+    { name: 'Load',           unit: '%',   avg: 45.1,   max: 82.0,   min: 28.0  },
+    { name: 'Temperature',    unit: '°C',  avg: 28.3,   max: 37.0,   min: 22.0  },
+  ],
+});
+
+export const mockSyncStatus: SyncStatusResponse = {
+  organizations: mockOrganizations.map((org, i) => ({
+    organization_id: org.id,
+    inventory_offset: 150 + i * 50,
+    alarm_offset: 75 + i * 20,
+    sensor_offset: 30 + i * 10,
+    last_sync_time: hoursAgo(i + 1),
+    last_sync_status: i === 1 ? 'FAILED' : 'SUCCESS',
+    last_error_message: i === 1 ? 'Rate limit exceeded, retry in 60s' : null,
+  })),
+};
