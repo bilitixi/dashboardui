@@ -7,14 +7,15 @@ export interface Organization {
 export interface Device {
   id: string;
   name: string;
-  serialNumber: string;
-  status: 'online' | 'offline' | 'warning' | 'charging';
-  batteryHealth: number;
-  batteryLevel: number;
-  lastSeen: string;
-  organizationId: string;
+  site: string;
   model: string;
-  firmwareVersion: string;
+  serialNumber: string;
+  assetTag: string;
+  status: 'Healthy' | 'Degraded' | 'Critical' | 'Offline';
+  battery: number;   // 0-100%
+  load: number;      // 0-100%
+  runtime: number;   // minutes
+  organizationId: string;
 }
 
 export interface Alarm {
@@ -27,24 +28,27 @@ export interface Alarm {
   acknowledged: boolean;
 }
 
-export interface Report {
-  id: string;
-  name: string;
-  type: string;
-  generatedAt: string;
-  downloadUrl: string;
-}
-
 export interface FleetSummary {
   totalDevices: number;
-  onlineDevices: number;
-  offlineDevices: number;
-  warningDevices: number;
-  avgBatteryHealth: number;
-  activeAlarms: number;
+  villages: number;
+  healthyDevices: number;
+  healthyPercent: number;
+  degradedDevices: number;
+  avgLoad: number;
+  peakLoad: number;
+  avgRuntime: number; // minutes
 }
 
 export interface BatteryHealthBucket {
   range: string;
   count: number;
+  color: string;
+  max: number; // for bar width calculation
+}
+
+export interface MaintenanceItem {
+  label: string;
+  site: string;
+  timeframe: string;
+  color: string;
 }

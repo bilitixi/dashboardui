@@ -7,17 +7,23 @@ import { UnitsTable } from '../components/Dashboard/UnitsTable';
 
 export default function Dashboard() {
   const [selectedOrgId, setSelectedOrgId] = useState<string | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <div className="min-h-screen bg-[#0f1520]">
-      <TopNav selectedOrgId={selectedOrgId} onOrgChange={setSelectedOrgId} />
-      <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f1520' }}>
+      <TopNav
+        selectedOrgId={selectedOrgId}
+        onOrgChange={setSelectedOrgId}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+      <main className="px-6 py-6 space-y-6 max-w-screen-2xl mx-auto">
         <SummaryCards />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-6">
           <BatteryHealthChart />
           <FleetLoadPanel />
         </div>
-        <UnitsTable organizationId={selectedOrgId} />
+        <UnitsTable organizationId={selectedOrgId} searchQuery={searchQuery} />
       </main>
     </div>
   );

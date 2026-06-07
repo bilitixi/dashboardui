@@ -1,35 +1,53 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Card } from '../ui/Card';
 import { useBatteryHealthDistribution } from '../../hooks/useDevices';
-
-const COLORS = ['#22c55e', '#4ade80', '#facc15', '#f97316', '#ef4444', '#dc2626'];
 
 export function BatteryHealthChart() {
   const { data = [], isLoading } = useBatteryHealthDistribution();
+  const maxCount = Math.max(...data.map((d) => d.count), 1);
 
   return (
-    <Card title="Battery Health Distribution">
+    <div style={{ backgroundColor: '#1a2235', border: '1px solid #1e2d45' }} className="rounded-xl p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <span className="text-white font-semibold text-base">Battery health distribution</span>
+        <span style={{ color: '#64748b' }} className="text-sm">
+          {data.reduce((s, d) => s + d.count, 0)} units · %
+        </span>
+      </div>
+
+      {/* Bars */}
       {isLoading ? (
-        <div className="h-48 bg-gray-700/30 animate-pulse rounded" />
+        <div className="space-y-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} style={{ backgroundColor: '#253047' }} className="h-6 rounded animate-pulse" />
+          ))}
+        </div>
       ) : (
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-            <XAxis dataKey="range" tick={{ fill: '#9ca3af', fontSize: 11 }} />
-            <YAxis tick={{ fill: '#9ca3af', fontSize: 11 }} />
-            <Tooltip
-              contentStyle={{ background: '#1a2740', border: '1px solid #374151', borderRadius: 8 }}
-              labelStyle={{ color: '#e5e7eb' }}
-              itemStyle={{ color: '#9ca3af' }}
-            />
-            <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-              {data.map((_entry: unknown, index: number) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="space-y-4">
+          {data.map((bucket) => {
+            const pct = (bucket.count / maxCount) * 100;
+            return (
+              <div key={bucket.range} className="flex items-center gap-4">
+                {/* Label */}
+                <div style={{ color: '#94a3b8', minWidth: 110 }} className="text-sm text-right">
+                  {bucket.range}
+                </div>
+                {/* Bar track */}
+                <div style={{ backgroundColor: '#253047', flex: 1 }} className="rounded-full h-3 overflow-hidden">
+                  <div
+                    style={{ width: `${pct}%`, backgroundColor: bucket.color, transition: 'width 0.6s ease' }}
+                    className="h-full rounded-full"
+                  />
+                </div>
+                {/* Count */}
+                <div style={{ color: '#cbd5e1', minWidth: 28 }} className="text-sm text-right font-medium">
+                  {bucket.count}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
-    </Card>
+    </div>
   );
 }

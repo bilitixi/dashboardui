@@ -1,49 +1,59 @@
 import React from 'react';
-import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
-import { useAlarms } from '../../hooks/useAlarms';
-import { formatDistanceToNow } from 'date-fns';
-import { Alarm } from '../../api/types';
+import { useFleetSummary } from '../../hooks/useDevices';
+import { mockMaintenanceItems } from '../../api/mockData';
 
 export function FleetLoadPanel() {
-  const { data, isLoading } = useAlarms();
-  const alarms: Alarm[] = data ?? [];
-
-  const activeAlarms = alarms.filter((a: Alarm) => !a.acknowledged);
+  const { data: summary, isLoading } = useFleetSummary();
 
   return (
-    <Card title={`Active Alarms (${activeAlarms.length})`}>
-      {isLoading ? (
-        <div className="space-y-2">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-12 bg-gray-700/30 animate-pulse rounded" />
+    <div style={{ backgroundColor: '#1a2235', border: '1px solid #1e2d45' }} className="rounded-xl p-6">
+      <div className="text-white font-semibold text-base mb-6">Fleet load & upcoming maintenance</div>
+
+      {/* Metrics row */}
+      {isLoading || !summary ? (
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {[0, 1, 2].map((i) => (
+            <div key={i} style={{ backgroundColor: '#253047' }} className="h-14 rounded animate-pulse" />
           ))}
         </div>
-      ) : activeAlarms.length === 0 ? (
-        <div className="text-center text-gray-500 py-6 text-sm">No active alarms</div>
       ) : (
-        <div className="space-y-2">
-          {activeAlarms.map((alarm) => (
-            <div
-              key={alarm.id}
-              className="flex items-start justify-between gap-2 p-2 rounded-lg bg-gray-800/40 border border-gray-700/30"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <Badge variant={alarm.type === 'critical' ? 'danger' : alarm.type === 'warning' ? 'warning' : 'info'}>
-                    {alarm.type}
-                  </Badge>
-                  <span className="text-xs text-gray-300 font-medium truncate">{alarm.deviceName}</span>
+        <div className="grid grid-cols-3 gap-6 mb-6">
+          <div>
+            <div style={{ color: '#64748b' }} className="text-xs uppercase tracking-widest mb-1">Avg Load</div>
+            <div className="text-3xl font-bold text-white">{summary.avgLoad}%</div>
+          </div>
+          <div>
+            <div style={{ color: '#64748b' }} className="text-xs uppercase tracking-widest mb-1">Peak Load</div>
+            <div className="text-3xl font-bold" style={{ color: '#f59e0b' }}>{summary.peakLoad}%</div>
+          </div>
+          <div>
+            <div style={{ color: '#64748b' }} className="text-xs uppercase tracking-widest mb-1">Avg Runtime</div>
+            <div className="text-3xl font-bold text-white">{summary.avgRuntime}m</div>
+          </div>
+        </div>
+      )}
+
+      {/* Divider + maintenance list */}
+      <div style={{ borderTop: '1px solid #1e2d45' }} className="pt-4">
+        <div style={{ color: '#64748b' }} className="text-xs uppercase tracking-widest mb-4">
+          Maintenance due · Next 3 to 6 months
+        </div>
+        <div className="space-y-4">
+          {mockMaintenanceItems.map((item, i) => (
+            <div key={i} className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <span className="mt-1 w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: item.color }} />
+                <div>
+                  <div className="text-sm text-white font-medium leading-snug">{item.label}</div>
+                  <div style={{ color: '#64748b' }} className="text-xs mt-0.5">{item.site}</div>
                 </div>
-                <p className="text-xs text-gray-400 truncate">{alarm.message}</p>
               </div>
-              <span className="text-xs text-gray-500 whitespace-nowrap">
-                {formatDistanceToNow(new Date(alarm.timestamp), { addSuffix: true })}
-              </span>
+              <div style={{ color: '#64748b' }} className="text-sm whitespace-nowrap">{item.timeframe}</div>
             </div>
           ))}
         </div>
-      )}
-    </Card>
+      </div>
+    </div>
   );
 }
