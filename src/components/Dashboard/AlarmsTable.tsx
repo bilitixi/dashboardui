@@ -7,13 +7,14 @@ interface Props { orgId: string; }
 
 const PAGE_SIZE = 8;
 
-function SeverityBadge({ severity }: { severity: Alarm['severity'] }) {
-  const map = {
+function SeverityBadge({ severity }: { severity: string }) {
+  const map: Record<string, { bg: string; color: string; border: string }> = {
     CRITICAL: { bg: '#2a1010', color: '#ef4444', border: '#ef444433' },
     WARNING:  { bg: '#2a1f0a', color: '#f59e0b', border: '#f59e0b33' },
     INFO:     { bg: '#0a1a2a', color: '#3b82f6', border: '#3b82f633' },
   };
-  const s = map[severity];
+  const key = (severity ?? '').toUpperCase();
+  const s = map[key] ?? { bg: '#1a2235', color: '#94a3b8', border: '#94a3b833' };
   return (
     <span style={{ backgroundColor: s.bg, color: s.color, border: `1px solid ${s.border}` }}
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium">
