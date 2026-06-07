@@ -82,14 +82,29 @@ export function TopNav({ selectedOrgId, onOrgChange, searchQuery, onSearchChange
         </button>
         {dropdownOpen && (
           <div style={{ backgroundColor: '#131d2e', border: '1px solid #1e2d45' }}
-            className="absolute right-0 top-full mt-1 w-52 rounded-lg shadow-2xl z-50 overflow-hidden">
-            {orgs.map(org => (
-              <button key={org.id} style={{ color: '#cbd5e1' }}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-blue-500/10 transition-colors"
-                onClick={() => { onOrgChange(org.id); setDropdownOpen(false); }}>
-                {org.label}
-              </button>
-            ))}
+            className="absolute right-0 top-full mt-1 w-56 rounded-lg shadow-2xl z-50 overflow-hidden">
+            {/* All orgs option */}
+            <button
+              style={{ color: !selectedOrgId ? '#60a5fa' : '#cbd5e1', borderBottom: '1px solid #1e2d45' }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-blue-500/10 transition-colors font-medium"
+              onClick={() => { onOrgChange(''); setDropdownOpen(false); }}>
+              🏠 All Organizations
+            </button>
+            {orgs.length === 0 ? (
+              <div style={{ color: '#64748b' }} className="px-3 py-3 text-sm text-center">
+                No organizations found.<br />
+                <span className="text-xs">Run bootstrap sync first.</span>
+              </div>
+            ) : (
+              orgs.map(org => (
+                <button key={org.id}
+                  style={{ color: selectedOrgId === org.id ? '#60a5fa' : '#cbd5e1' }}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-blue-500/10 transition-colors"
+                  onClick={() => { onOrgChange(org.id); setDropdownOpen(false); }}>
+                  {org.label}
+                </button>
+              ))
+            )}
           </div>
         )}
       </div>

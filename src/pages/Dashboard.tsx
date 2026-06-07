@@ -13,8 +13,9 @@ export default function Dashboard() {
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Default to first org once loaded
-  const orgId = selectedOrgId || orgs[0]?.id || '';
+  // '' means "All" — fall back to first org for API calls that require an org_id
+  const firstOrgId = orgs[0]?.id ?? '';
+  const orgId = selectedOrgId || firstOrgId;
 
   if (orgsLoading) {
     return (
@@ -28,29 +29,44 @@ export default function Dashboard() {
     );
   }
 
+  if (orgs.length === 0) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#0f1520' }}>
+        <TopNav selectedOrgId="" onOrgChange={setSelectedOrgId} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <div className="flex flex-col items-center justify-center" style={{ minHeight: 'calc(100vh - 60px)' }}>
+          <div style={{ color: '#3b82f6', fontSize: 48 }} className="mb-4">⚡</div>
+          <div className="text-white text-xl font-semibold mb-2">No organizations found</div>
+          <div style={{ color: '#64748b' }} className="text-sm text-center max-w-sm">
+            Your database is empty. Run a bootstrap sync to fetch data from EcoStruxure.
+          </div>
+          <code style={{ backgroundColor: '#1a2235', color: '#4ade80', border: '1px solid #1e2d45' }}
+            className="mt-4 px-4 py-2 rounded-lg text-sm font-mono">
+            POST /api/sync/bootstrap
+          </code>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0f1520' }}>
       <TopNav
-        selectedOrgId={orgId}
+        selectedOrgId={selectedOrgId}
         onOrgChange={setSelectedOrgId}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
 
       <main className="px-6 py-6 space-y-6 max-w-screen-2xl mx-auto">
-        {/* Row 1 — Summary KPIs */}
         <SummaryCards orgId={orgId} />
 
-        {/* Row 2 — Alarms chart + Power metrics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AlarmsSummaryChart orgId={orgId} />
           <PowerUsagePanel orgId={orgId} />
         </div>
 
-        {/* Row 3 — Alarms table */}
         <AlarmsTable orgId={orgId} />
 
-        {/* Row 4 — Devices table + Sync status */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2">
             <UnitsTable orgId={orgId} searchQuery={searchQuery} />
