@@ -1,200 +1,43 @@
-import type { Organization, Device, Alarm, AlarmsSummary, DeviceHealth, PowerUsage } from './types';
+import { Device, Alarm, Organization, FleetSummary, BatteryHealthBucket } from './types';
 
 export const mockOrganizations: Organization[] = [
-  { id: 'org-1', name: 'Auckland Villages', slug: 'auckland-villages' },
-  { id: 'org-2', name: 'Wellington Network', slug: 'wellington-network' },
-  { id: 'org-3', name: 'Christchurch Grid', slug: 'christchurch-grid' },
+  { id: 'org-1', name: 'Acme Corp', deviceCount: 42 },
+  { id: 'org-2', name: 'Beta Industries', deviceCount: 27 },
+  { id: 'org-3', name: 'Gamma Solutions', deviceCount: 15 },
 ];
 
 export const mockDevices: Device[] = [
-  {
-    id: 'dev-1',
-    organization_id: 'org-1',
-    label: 'UPS-UNIT-42',
-    hostname: '192.168.1.42',
-    model: 'APC Smart-UPS AP9620RM',
-    status: 'healthy',
-    asset_tag: 'AKL-042',
-    site: 'Auckland-East',
-    battery_percentage: 97,
-    load_percentage: 34,
-    runtime_minutes: 180,
-  },
-  {
-    id: 'dev-2',
-    organization_id: 'org-1',
-    label: 'UPS-UNIT-07',
-    hostname: '192.168.1.7',
-    model: 'APC Smart-UPS 3000',
-    status: 'healthy',
-    asset_tag: 'AKL-007',
-    site: 'Auckland-Central',
-    battery_percentage: 96,
-    load_percentage: 45,
-    runtime_minutes: 150,
-  },
-  {
-    id: 'dev-3',
-    organization_id: 'org-1',
-    label: 'UPS-UNIT-15',
-    hostname: '192.168.1.15',
-    model: 'APC Back-UPS Pro 1500',
-    status: 'degraded',
-    asset_tag: 'AKL-015',
-    site: 'Auckland-North',
-    battery_percentage: 83,
-    load_percentage: 62,
-    runtime_minutes: 95,
-  },
-  {
-    id: 'dev-4',
-    organization_id: 'org-1',
-    label: 'UPS-UNIT-28',
-    hostname: '192.168.2.28',
-    model: 'APC Smart-UPS AP9620RM',
-    status: 'healthy',
-    asset_tag: 'WLG-028',
-    site: 'Auckland-South',
-    battery_percentage: 99,
-    load_percentage: 28,
-    runtime_minutes: 240,
-  },
-  {
-    id: 'dev-5',
-    organization_id: 'org-2',
-    label: 'UPS-UNIT-53',
-    hostname: '192.168.2.53',
-    model: 'APC Smart-UPS 5000',
-    status: 'critical',
-    asset_tag: 'WLG-053',
-    site: 'Wellington-CBD',
-    battery_percentage: 71,
-    load_percentage: 88,
-    runtime_minutes: 40,
-  },
-  {
-    id: 'dev-6',
-    organization_id: 'org-2',
-    label: 'UPS-UNIT-61',
-    hostname: '192.168.2.61',
-    model: 'APC Smart-UPS AP9620RM',
-    status: 'healthy',
-    asset_tag: 'WLG-061',
-    site: 'Wellington-North',
-    battery_percentage: 93,
-    load_percentage: 41,
-    runtime_minutes: 130,
-  },
-  {
-    id: 'dev-7',
-    organization_id: 'org-2',
-    label: 'UPS-UNIT-34',
-    hostname: '192.168.3.34',
-    model: 'APC Back-UPS Pro 1000',
-    status: 'degraded',
-    asset_tag: 'WLG-034',
-    site: 'Wellington-South',
-    battery_percentage: 86,
-    load_percentage: 55,
-    runtime_minutes: 110,
-  },
-  {
-    id: 'dev-8',
-    organization_id: 'org-3',
-    label: 'UPS-UNIT-19',
-    hostname: '192.168.3.19',
-    model: 'APC Smart-UPS 3000',
-    status: 'healthy',
-    asset_tag: 'CHC-019',
-    site: 'Christchurch-East',
-    battery_percentage: 95,
-    load_percentage: 38,
-    runtime_minutes: 165,
-  },
-  {
-    id: 'dev-9',
-    organization_id: 'org-3',
-    label: 'UPS-UNIT-77',
-    hostname: '192.168.3.77',
-    model: 'APC Smart-UPS AP9620RM',
-    status: 'healthy',
-    asset_tag: 'CHC-077',
-    site: 'Christchurch-CBD',
-    battery_percentage: 98,
-    load_percentage: 22,
-    runtime_minutes: 210,
-  },
-  {
-    id: 'dev-10',
-    organization_id: 'org-3',
-    label: 'UPS-UNIT-88',
-    hostname: '192.168.3.88',
-    model: 'APC Back-UPS Pro 1500',
-    status: 'degraded',
-    asset_tag: 'CHC-088',
-    site: 'Christchurch-West',
-    battery_percentage: 78,
-    load_percentage: 67,
-    runtime_minutes: 75,
-  },
+  { id: 'd-001', name: 'Unit Alpha-01', serialNumber: 'SN-10001', status: 'online', batteryHealth: 95, batteryLevel: 82, lastSeen: new Date().toISOString(), organizationId: 'org-1', model: 'ProPack X200', firmwareVersion: '2.4.1' },
+  { id: 'd-002', name: 'Unit Alpha-02', serialNumber: 'SN-10002', status: 'warning', batteryHealth: 71, batteryLevel: 45, lastSeen: new Date(Date.now() - 300000).toISOString(), organizationId: 'org-1', model: 'ProPack X200', firmwareVersion: '2.4.1' },
+  { id: 'd-003', name: 'Unit Beta-01', serialNumber: 'SN-20001', status: 'offline', batteryHealth: 88, batteryLevel: 12, lastSeen: new Date(Date.now() - 3600000).toISOString(), organizationId: 'org-2', model: 'ProPack X100', firmwareVersion: '2.3.9' },
+  { id: 'd-004', name: 'Unit Beta-02', serialNumber: 'SN-20002', status: 'charging', batteryHealth: 92, batteryLevel: 67, lastSeen: new Date().toISOString(), organizationId: 'org-2', model: 'ProPack X100', firmwareVersion: '2.4.0' },
+  { id: 'd-005', name: 'Unit Gamma-01', serialNumber: 'SN-30001', status: 'online', batteryHealth: 78, batteryLevel: 91, lastSeen: new Date().toISOString(), organizationId: 'org-3', model: 'ProPack X300', firmwareVersion: '2.4.1' },
+  { id: 'd-006', name: 'Unit Alpha-03', serialNumber: 'SN-10003', status: 'online', batteryHealth: 55, batteryLevel: 73, lastSeen: new Date().toISOString(), organizationId: 'org-1', model: 'ProPack X200', firmwareVersion: '2.4.1' },
+  { id: 'd-007', name: 'Unit Alpha-04', serialNumber: 'SN-10004', status: 'warning', batteryHealth: 62, batteryLevel: 38, lastSeen: new Date(Date.now() - 600000).toISOString(), organizationId: 'org-1', model: 'ProPack X200', firmwareVersion: '2.3.9' },
+  { id: 'd-008', name: 'Unit Beta-03', serialNumber: 'SN-20003', status: 'online', batteryHealth: 99, batteryLevel: 100, lastSeen: new Date().toISOString(), organizationId: 'org-2', model: 'ProPack X100', firmwareVersion: '2.4.1' },
 ];
 
 export const mockAlarms: Alarm[] = [
-  {
-    id: 'alm-1',
-    organization_id: 'org-2',
-    device_id: 'dev-5',
-    severity: 'critical',
-    status: 'active',
-    message: 'Battery level critically low (<75%)',
-    created_at: new Date(Date.now() - 3600000).toISOString(),
-  },
-  {
-    id: 'alm-2',
-    organization_id: 'org-1',
-    device_id: 'dev-3',
-    severity: 'warning',
-    status: 'active',
-    message: 'High load detected (>60%)',
-    created_at: new Date(Date.now() - 7200000).toISOString(),
-  },
-  {
-    id: 'alm-3',
-    organization_id: 'org-3',
-    device_id: 'dev-10',
-    severity: 'warning',
-    status: 'active',
-    message: 'Battery degraded (<80%)',
-    created_at: new Date(Date.now() - 14400000).toISOString(),
-  },
+  { id: 'a-001', deviceId: 'd-002', deviceName: 'Unit Alpha-02', type: 'warning', message: 'Battery health below 75%', timestamp: new Date(Date.now() - 300000).toISOString(), acknowledged: false },
+  { id: 'a-002', deviceId: 'd-003', deviceName: 'Unit Beta-01', type: 'critical', message: 'Device offline for over 1 hour', timestamp: new Date(Date.now() - 3600000).toISOString(), acknowledged: false },
+  { id: 'a-003', deviceId: 'd-006', deviceName: 'Unit Alpha-03', type: 'warning', message: 'Battery health below 60%', timestamp: new Date(Date.now() - 900000).toISOString(), acknowledged: true },
+  { id: 'a-004', deviceId: 'd-007', deviceName: 'Unit Alpha-04', type: 'warning', message: 'Battery level critically low', timestamp: new Date(Date.now() - 600000).toISOString(), acknowledged: false },
 ];
 
-export function getMockAlarmsSummary(org_id?: string): AlarmsSummary {
-  const alarms = org_id ? mockAlarms.filter((a) => a.organization_id === org_id) : mockAlarms;
-  return {
-    critical: alarms.filter((a) => a.severity === 'critical' && a.status === 'active').length,
-    warning: alarms.filter((a) => a.severity === 'warning' && a.status === 'active').length,
-    info: alarms.filter((a) => a.severity === 'info' && a.status === 'active').length,
-    total: alarms.filter((a) => a.status === 'active').length,
-  };
-}
+export const mockFleetSummary: FleetSummary = {
+  totalDevices: 84,
+  onlineDevices: 61,
+  offlineDevices: 12,
+  warningDevices: 11,
+  avgBatteryHealth: 79,
+  activeAlarms: 3,
+};
 
-export function getMockDeviceHealth(org_id?: string): DeviceHealth {
-  const devices = org_id ? mockDevices.filter((d) => d.organization_id === org_id) : mockDevices;
-  return {
-    total_devices: devices.length,
-    active_alarms: mockAlarms.filter(
-      (a) => a.status === 'active' && (!org_id || a.organization_id === org_id)
-    ).length,
-  };
-}
-
-export function getMockPowerUsage(org_id?: string): PowerUsage {
-  const devices = org_id ? mockDevices.filter((d) => d.organization_id === org_id) : mockDevices;
-  const loads = devices.map((d) => d.load_percentage ?? 0);
-  const runtimes = devices.map((d) => d.runtime_minutes ?? 0);
-  const avg_load = Math.round(loads.reduce((a, b) => a + b, 0) / loads.length);
-  const peak_load = Math.max(...loads);
-  const avg_runtime = Math.round(runtimes.reduce((a, b) => a + b, 0) / runtimes.length);
-  return { avg_load, peak_load, avg_runtime };
-}
+export const mockBatteryHealthData: BatteryHealthBucket[] = [
+  { range: '90-100%', count: 28 },
+  { range: '80-89%', count: 19 },
+  { range: '70-79%', count: 15 },
+  { range: '60-69%', count: 12 },
+  { range: '50-59%', count: 7 },
+  { range: '<50%', count: 3 },
+];

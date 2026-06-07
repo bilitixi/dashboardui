@@ -1,75 +1,58 @@
 import axios from 'axios';
-import type {
-  Organization,
-  Device,
-  Alarm,
-  Sensor,
-  Measurement,
-  AlarmsSummary,
-  DeviceHealth,
-  PowerUsage,
-  SyncStatus,
-  PaginatedResponse,
-} from './types';
+import { Device, Alarm, Organization, FleetSummary, BatteryHealthBucket } from './types';
+import {
+  mockDevices,
+  mockAlarms,
+  mockOrganizations,
+  mockFleetSummary,
+  mockBatteryHealthData,
+} from './mockData';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const BASE_URL = process.env.REACT_APP_API_URL || '';
 
-export const apiClient = axios.create({
-  baseURL: API_URL,
-  timeout: 10000,
+const apiClient = axios.create({
+  baseURL: BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-export const api = {
-  getOrganizations: (): Promise<Organization[]> =>
-    apiClient.get('/api/organizations').then((r) => r.data),
+const USE_MOCK = !BASE_URL;
 
-  getDevices: (params?: {
-    organization_id?: string;
-    location_id?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<PaginatedResponse<Device>> =>
-    apiClient.get('/api/devices', { params }).then((r) => r.data),
+export async function fetchOrganizations(): Promise<Organization[]> {
+  if (USE_MOCK) return mockOrganizations;
+  const { data } = await apiClient.get<Organization[]>('/organizations');
+  return data;
+}
 
-  getAlarms: (params?: {
-    organization_id?: string;
-    severity?: string;
-    status?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<PaginatedResponse<Alarm>> =>
-    apiClient.get('/api/alarms', { params }).then((r) => r.data),
+export async function fetchDevices(organizationId?: string): Promise<Device[]> {
+  if (USE_MOCK) {
+    return organizationId
+      ? mockDevices.filter((d) => d.organizationId === organizationId)
+      : mockDevices;
+  }
+  const params = organizationId ? { organizationId } : {};
+  const { data } = await apiClient.get<Device[]>('/devices', { params });
+  return data;
+}
 
-  getSensors: (device_id: string): Promise<Sensor[]> =>
-    apiClient.get(`/api/sensors/${device_id}`).then((r) => r.data),
+export async function fetchAlarms(acknowledged?: boolean): Promise<Alarm[]> {
+  if (USE_MOCK) {
+    return acknowledged !== undefined
+      ? mockAlarms.filter((a) => a.acknowledged === acknowledged)
+      : mockAlarms;
+  }
+  const params = acknowledged !== undefined ? { acknowledged } : {};
+  const { data } = await apiClient.get<Alarm[]>('/alarms', { params });
+  return data;
+}
 
-  getMeasurements: (
-    sensor_id: string,
-    params?: { start_time?: string; end_time?: string; limit?: number; offset?: number }
-  ): Promise<PaginatedResponse<Measurement>> =>
-    apiClient.get(`/api/measurements/${sensor_id}`, { params }).then((r) => r.data),
+export async function fetchFleetSummary(): Promise<FleetSummary> {
+  if (USE_MOCK) return mockFleetSummary;
+  const { data } = await apiClient.get<FleetSummary>('/fleet/summary');
+  return data;
+}
 
-  getAlarmsSummary: (params?: {
-    organization_id?: string;
-    timeframe_hours?: number;
-  }): Promise<AlarmsSummary> =>
-    apiClient.get('/api/reports/alarms-summary', { params }).then((r) => r.data),
-
-  getDeviceHealth: (params?: { organization_id?: string }): Promise<DeviceHealth> =>
-    apiClient.get('/api/reports/device-health', { params }).then((r) => r.data),
-
-  getPowerUsage: (params?: {
-    organization_id?: string;
-    timeframe_hours?: number;
-  }): Promise<PowerUsage> =>
-    apiClient.get('/api/reports/power-usage', { params }).then((r) => r.data),
-
-  getSyncStatus: (): Promise<SyncStatus[]> =>
-    apiClient.get('/api/sync/status').then((r) => r.data),
-
-  triggerBootstrap: (): Promise<void> =>
-    apiClient.post('/api/sync/bootstrap').then((r) => r.data),
-
-  triggerIncremental: (org_id: string): Promise<void> =>
-    apiClient.post(`/api/sync/incremental/${org_id}`).then((r) => r.data),
-};
+export async function fetchBatteryHealthDistribution(): Promise<BatteryHealthBucket[]> {
+  if (USE_MOCK) return mockBatteryHealthData;
+  const { data } = await apiClient.get<BatteryHealthBucket[]>('/fleet/battery-health');
+  return data;
+}

@@ -3,19 +3,14 @@ import React from 'react';
 interface CardProps {
   children: React.ReactNode;
   className?: string;
-  highlighted?: boolean;
+  title?: string;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', highlighted = false }) => {
+export function Card({ children, className = '', title }: CardProps) {
   return (
-    <div
-      className={`rounded-xl border p-5 ${
-        highlighted
-          ? 'bg-red-900/20 border-red-500/40'
-          : 'bg-[#1a2235] border-[#2a3548]'
-      } ${className}`}
-    >
+    <div className={`bg-[#151f2e] border border-gray-700/50 rounded-xl p-4 ${className}`}>
+      {title && <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">{title}</h3>}
       {children}
     </div>
   );
-};
+}

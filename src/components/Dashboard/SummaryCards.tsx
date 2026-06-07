@@ -1,55 +1,67 @@
 import React from 'react';
+import { Wifi, WifiOff, AlertTriangle, Heart } from 'lucide-react';
 import { Card } from '../ui/Card';
-import type { Device } from '../../api/types';
+import { useFleetSummary } from '../../hooks/useDevices';
 
-interface SummaryCardsProps {
-  devices: Device[];
-  organizations: { id: string; name: string }[];
-  selectedOrgId?: string;
-}
+export function SummaryCards() {
+  const { data: summary, isLoading } = useFleetSummary();
 
-export const SummaryCards: React.FC<SummaryCardsProps> = ({ devices, organizations, selectedOrgId }) => {
-  const total = devices.length;
-  const healthy = devices.filter((d) => d.status === 'healthy').length;
-  const degraded = devices.filter((d) => d.status === 'degraded' || d.status === 'critical').length;
-  const healthyPct = total > 0 ? Math.round((healthy / total) * 100) : 0;
+  if (isLoading || !summary) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <div className="h-16 bg-gray-700/30 animate-pulse rounded" />
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
-  const villageCount = selectedOrgId
-    ? 1
-    : organizations.length;
-
-  const orgLabel = selectedOrgId
-    ? organizations.find((o) => o.id === selectedOrgId)?.name ?? '1 village'
-    : `${villageCount} villages`;
+  const cards = [
+    {
+      label: 'Online',
+      value: summary.onlineDevices,
+      total: summary.totalDevices,
+      icon: <Wifi size={20} className="text-green-400" />,
+      color: 'text-green-400',
+    },
+    {
+      label: 'Offline',
+      value: summary.offlineDevices,
+      total: summary.totalDevices,
+      icon: <WifiOff size={20} className="text-red-400" />,
+      color: 'text-red-400',
+    },
+    {
+      label: 'Warnings',
+      value: summary.warningDevices,
+      total: summary.totalDevices,
+      icon: <AlertTriangle size={20} className="text-yellow-400" />,
+      color: 'text-yellow-400',
+    },
+    {
+      label: 'Avg Battery Health',
+      value: `${summary.avgBatteryHealth}%`,
+      icon: <Heart size={20} className="text-blue-400" />,
+      color: 'text-blue-400',
+    },
+  ];
 
   return (
-    <div className="grid grid-cols-3 gap-4">
-      {/* Total monitored */}
-      <Card>
-        <div className="text-[#94a3b8] text-xs font-medium uppercase tracking-wider mb-3">
-          Total monitored
-        </div>
-        <div className="text-4xl font-bold text-white mb-1">{total}</div>
-        <div className="text-[#94a3b8] text-xs">{orgLabel}</div>
-      </Card>
-
-      {/* Healthy */}
-      <Card>
-        <div className="text-[#94a3b8] text-xs font-medium uppercase tracking-wider mb-3">
-          Healthy
-        </div>
-        <div className="text-4xl font-bold text-white mb-1">{healthy}</div>
-        <div className="text-green-400 text-xs font-medium">{healthyPct}% of fleet</div>
-      </Card>
-
-      {/* Degraded */}
-      <Card highlighted>
-        <div className="text-[#94a3b8] text-xs font-medium uppercase tracking-wider mb-3">
-          Degraded
-        </div>
-        <div className="text-4xl font-bold text-white mb-1">{degraded}</div>
-        <div className="text-red-400 text-xs font-medium">battery or load issues</div>
-      </Card>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {cards.map((card) => (
+        <Card key={card.label}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">{card.label}</span>
+            {card.icon}
+          </div>
+          <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
+          {card.total !== undefined && (
+            <div className="text-xs text-gray-500 mt-1">of {card.total} total</div>
+          )}
+        </Card>
+      ))}
     </div>
   );
-};
+}
