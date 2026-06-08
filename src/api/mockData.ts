@@ -1,5 +1,5 @@
 import {
-  Organization, Device, PagedResponse, Alarm,
+  Organization, Location, Device, PagedResponse, Alarm,
   AlarmsSummaryReport, DeviceHealthReport, PowerUsageReport,
   SyncStatusResponse,
 } from './types';
@@ -13,6 +13,13 @@ export const mockOrganizations: Organization[] = [
   { id: 'org-3', label: 'Hibiscus Coast', address: '12 Coast Ave, Whangaparaoa', inventory_object_type: 'organization', updated_at: now },
 ];
 
+export const mockLocations: Location[] = [
+  { id: 'loc-1', organization_id: 'org-1', label: 'Auckland-East', address: null, parent_id: null, type: 'site', inventory_object_type: 'location', updated_at: now },
+  { id: 'loc-2', organization_id: 'org-1', label: 'Server Room A', address: null, parent_id: 'loc-1', type: 'room', inventory_object_type: 'location', updated_at: now },
+  { id: 'loc-3', organization_id: 'org-2', label: 'Highlands Hub', address: null, parent_id: null, type: 'site', inventory_object_type: 'location', updated_at: now },
+  { id: 'loc-4', organization_id: 'org-3', label: 'Coast Data Centre', address: null, parent_id: null, type: 'site', inventory_object_type: 'location', updated_at: now },
+];
+
 export const mockDevices: Device[] = [
   { id: 'd-001', organization_id: 'org-1', location_id: 'loc-1', parent_id: null, label: 'UPS-UNIT-42', inventory_object_type: 'device', model_name: 'APC Smart-UPS AP9620RM', device_note: null, serial_number: 'SN-10001', hostname: 'ups-unit-42', firmware_version: '1.4.2', hardware_version: '2.0', part_number: 'AP9620RM', manufacturer: 'APC', ipv4_addresses: ['192.168.1.101'], ipv6_addresses: [], mac_addresses: ['00:1A:2B:3C:4D:5E'], gateway_ids: [], updated_at: hoursAgo(1) },
   { id: 'd-002', organization_id: 'org-1', location_id: 'loc-1', parent_id: null, label: 'UPS-UNIT-07', inventory_object_type: 'device', model_name: 'APC Smart-UPS 3000', device_note: 'Server room primary', serial_number: 'SN-10002', hostname: 'ups-unit-07', firmware_version: '1.4.0', hardware_version: '2.0', part_number: 'SU3000', manufacturer: 'APC', ipv4_addresses: ['192.168.1.102'], ipv6_addresses: [], mac_addresses: ['00:1A:2B:3C:4D:5F'], gateway_ids: [], updated_at: hoursAgo(2) },
@@ -24,8 +31,9 @@ export const mockDevices: Device[] = [
   { id: 'd-008', organization_id: 'org-1', location_id: 'loc-2', parent_id: null, label: 'UPS-UNIT-74', inventory_object_type: 'device', model_name: 'APC Smart-UPS AP9630', device_note: null, serial_number: 'SN-10004', hostname: 'ups-unit-74', firmware_version: '1.4.2', hardware_version: '2.0', part_number: 'AP9630', manufacturer: 'APC', ipv4_addresses: ['192.168.1.104'], ipv6_addresses: [], mac_addresses: ['00:1A:2B:3C:4D:61'], gateway_ids: [], updated_at: hoursAgo(1) },
 ];
 
-export const mockDevicesPage = (orgId?: string, limit = 50, offset = 0): PagedResponse<Device> => {
-  const filtered = orgId ? mockDevices.filter(d => d.organization_id === orgId) : mockDevices;
+export const mockDevicesPage = (orgId?: string, locationId?: string, limit = 50, offset = 0): PagedResponse<Device> => {
+  let filtered = orgId ? mockDevices.filter(d => d.organization_id === orgId) : mockDevices;
+  if (locationId) filtered = filtered.filter(d => d.location_id === locationId);
   return { items: filtered.slice(offset, offset + limit), total: filtered.length, limit, offset };
 };
 
@@ -59,11 +67,12 @@ export const mockPowerUsage = (orgId: string): PowerUsageReport => ({
   organization_id: orgId,
   timeframe_hours: 24,
   sensors: [
-    { name: 'Output Power',   unit: 'W',   avg: 1250.5, max: 2000.0, min: 800.0 },
-    { name: 'Input Voltage',  unit: 'V',   avg: 230.2,  max: 240.0,  min: 220.0 },
-    { name: 'Battery Charge', unit: '%',   avg: 87.4,   max: 100.0,  min: 61.0  },
-    { name: 'Load',           unit: '%',   avg: 45.1,   max: 82.0,   min: 28.0  },
-    { name: 'Temperature',    unit: '°C',  avg: 28.3,   max: 37.0,   min: 22.0  },
+    { sensor_id: 's-001', name: 'Output Power',   unit: 'W',  avg: 1250.5, max: 2000.0, min: 800.0,  count: 1440 },
+    { sensor_id: 's-002', name: 'Input Voltage',  unit: 'V',  avg: 230.2,  max: 240.0,  min: 220.0,  count: 1440 },
+    { sensor_id: 's-003', name: 'Battery Charge', unit: '%',  avg: 87.4,   max: 100.0,  min: 61.0,   count: 1440 },
+    { sensor_id: 's-004', name: 'Load',           unit: '%',  avg: 45.1,   max: 82.0,   min: 28.0,   count: 1440 },
+    { sensor_id: 's-005', name: 'Temperature',    unit: '°C', avg: 28.3,   max: 37.0,   min: 22.0,   count: 720  },
+    { sensor_id: 's-006', name: 'Output Current', unit: 'A',  avg: null,   max: null,   min: null,   count: 0    },
   ],
 });
 

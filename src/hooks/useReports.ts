@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import {
-  fetchAlarmsSummary, fetchDeviceHealth, fetchPowerUsage,
+  fetchAlarmsSummary, fetchDeviceHealth, fetchPowerUsage, PowerUsageFilters,
   fetchSyncStatus, triggerBootstrap, triggerIncrementalSync,
 } from '../api/client';
 import {
@@ -13,6 +13,7 @@ export function useAlarmsSummary(orgId: string, hours = 24): UseQueryResult<Alar
     queryFn: () => fetchAlarmsSummary(orgId, hours),
     staleTime: 60000,
     refetchInterval: 60000,
+    enabled: !!orgId,
   });
 }
 
@@ -22,15 +23,17 @@ export function useDeviceHealth(orgId: string): UseQueryResult<DeviceHealthRepor
     queryFn: () => fetchDeviceHealth(orgId),
     staleTime: 30000,
     refetchInterval: 30000,
+    enabled: !!orgId,
   });
 }
 
-export function usePowerUsage(orgId: string, hours = 24): UseQueryResult<PowerUsageReport> {
+export function usePowerUsage(filters: PowerUsageFilters): UseQueryResult<PowerUsageReport> {
   return useQuery<PowerUsageReport>({
-    queryKey: ['powerUsage', orgId, hours],
-    queryFn: () => fetchPowerUsage(orgId, hours),
+    queryKey: ['powerUsage', filters],
+    queryFn: () => fetchPowerUsage(filters),
     staleTime: 60000,
     refetchInterval: 60000,
+    enabled: !!filters.organization_id,
   });
 }
 

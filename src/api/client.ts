@@ -1,11 +1,11 @@
 import axios from 'axios';
 import {
-  Organization, Device, PagedResponse, Alarm,
+  Organization, Location, Device, PagedResponse, Alarm,
   AlarmsSummaryReport, DeviceHealthReport, PowerUsageReport,
   SyncStatusResponse,
 } from './types';
 import {
-  mockOrganizations, mockDevicesPage, mockAlarms,
+  mockOrganizations, mockLocations, mockDevicesPage, mockAlarms,
   mockAlarmsSummary, mockDeviceHealth, mockPowerUsage, mockSyncStatus,
 } from './mockData';
 
@@ -21,6 +21,13 @@ export async function fetchOrganizations(): Promise<Organization[]> {
   return data;
 }
 
+// ── Locations ─────────────────────────────────────────────────────────────────
+export async function fetchLocations(organization_id: string): Promise<Location[]> {
+  if (USE_MOCK) return mockLocations.filter(l => l.organization_id === organization_id);
+  const { data } = await api.get<Location[]>('/api/locations', { params: { organization_id } });
+  return data;
+}
+
 // ── Devices ───────────────────────────────────────────────────────────────────
 export interface DeviceFilters {
   organization_id: string;
@@ -30,7 +37,7 @@ export interface DeviceFilters {
 }
 
 export async function fetchDevices(filters: DeviceFilters): Promise<PagedResponse<Device>> {
-  if (USE_MOCK) return mockDevicesPage(filters.organization_id, filters.limit, filters.offset);
+  if (USE_MOCK) return mockDevicesPage(filters.organization_id, filters.location_id, filters.limit, filters.offset);
   const { data } = await api.get<PagedResponse<Device>>('/api/devices', { params: filters });
   return data;
 }
@@ -48,10 +55,10 @@ export async function fetchAlarms(filters: AlarmFilters): Promise<PagedResponse<
   if (USE_MOCK) {
     let items = [...mockAlarms];
     if (filters.severity) items = items.filter(a => a.severity === filters.severity);
-    if (filters.status === 'active') items = items.filter(a => a.cleared_time === null);
+    if (filters.status === 'active')  items = items.filter(a => a.cleared_time === null);
     if (filters.status === 'cleared') items = items.filter(a => a.cleared_time !== null);
     const offset = filters.offset ?? 0;
-    const limit = filters.limit ?? 50;
+    const limit  = filters.limit  ?? 50;
     return { items: items.slice(offset, offset + limit), total: items.length, limit, offset };
   }
   const { data } = await api.get<PagedResponse<Alarm>>('/api/alarms', { params: filters });
@@ -77,13 +84,15 @@ export async function fetchDeviceHealth(organization_id: string): Promise<Device
   return data;
 }
 
-export async function fetchPowerUsage(
-  organization_id: string, timeframe_hours = 24
-): Promise<PowerUsageReport> {
-  if (USE_MOCK) return mockPowerUsage(organization_id);
-  const { data } = await api.get<PowerUsageReport>('/api/reports/power-usage', {
-    params: { organization_id, timeframe_hours },
-  });
+export interface PowerUsageFilters {
+  organization_id: string;
+  timeframe_hours?: number;
+  unit?: string; // optional unit filter e.g. 'W', 'V', '%'
+}
+
+export async function fetchPowerUsage(filters: PowerUsageFilters): Promise<PowerUsageReport> {
+  if (USE_MOCK) return mockPowerUsage(filters.organization_id);
+  const { data } = await api.get<PowerUsageReport>('/api/reports/power-usage', { params: filters });
   return data;
 }
 

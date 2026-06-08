@@ -8,6 +8,17 @@ export interface Organization {
   updated_at: string;
 }
 
+export interface Location {
+  id: string;
+  organization_id: string;
+  label: string;
+  address: string | null;
+  parent_id: string | null;
+  type: string | null;
+  inventory_object_type: string;
+  updated_at: string;
+}
+
 export interface Device {
   id: string;
   organization_id: string;
@@ -17,12 +28,12 @@ export interface Device {
   inventory_object_type: string;
   model_name: string | null;
   device_note: string | null;
-  serial_number: string | null;
+  serial_number: string | null; // not unique — sub-components may share serials
   hostname: string | null;
   firmware_version: string | null;
   hardware_version: string | null;
   part_number: string | null;
-  manufacturer: string | null;
+  manufacturer: string | null;  // mapped from manufacturerName in EcoStruxure API
   ipv4_addresses: string[];
   ipv6_addresses: string[];
   mac_addresses: string[];
@@ -89,11 +100,13 @@ export interface DeviceHealthReport {
 }
 
 export interface PowerSensorStat {
+  sensor_id: string;
   name: string;
   unit: string;
-  avg: number;
-  max: number;
-  min: number;
+  avg: number | null;   // null when count = 0
+  max: number | null;
+  min: number | null;
+  count: number;
 }
 
 export interface PowerUsageReport {
