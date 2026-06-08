@@ -11,6 +11,7 @@ const COLORS: Record<string, string> = {
   CRITICAL: '#ef4444',
   WARNING:  '#f59e0b',
   INFO:     '#3b82f6',
+  OK:       '#22c55e',
 };
 
 const WINDOWS = [
