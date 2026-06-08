@@ -13,9 +13,14 @@ export default function Dashboard() {
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // '' means "All" — fall back to first org for API calls that require an org_id
-  const firstOrgId = orgs[0]?.id ?? '';
-  const orgId = selectedOrgId || firstOrgId;
+  // Auto-select first org once orgs load (only if user hasn't manually picked one)
+  React.useEffect(() => {
+    if (orgs.length > 0 && selectedOrgId === '') {
+      setSelectedOrgId(orgs[0].id);
+    }
+  }, [orgs, selectedOrgId]);
+
+  const orgId = selectedOrgId || orgs[0]?.id || '';
 
   if (orgsLoading) {
     return (
