@@ -12,6 +12,7 @@ function SeverityBadge({ severity }: { severity: string }) {
     CRITICAL: { bg: '#2a1010', color: '#ef4444', border: '#ef444433' },
     WARNING:  { bg: '#2a1f0a', color: '#f59e0b', border: '#f59e0b33' },
     INFO:     { bg: '#0a1a2a', color: '#3b82f6', border: '#3b82f633' },
+    OK:       { bg: '#0a1f12', color: '#22c55e', border: '#22c55e33' },
   };
   const key = (severity ?? '').toUpperCase();
   const s = map[key] ?? { bg: '#1a2235', color: '#94a3b8', border: '#94a3b833' };
