@@ -77,7 +77,7 @@ export function TopNav({ selectedOrgId, onOrgChange, searchQuery, onSearchChange
           style={{ backgroundColor: '#131d2e', border: '1px solid #1e2d45', color: '#cbd5e1' }}
           className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm hover:border-slate-500 transition-colors">
           <Home size={13} style={{ color: '#64748b' }} />
-          <span>{selectedOrg ? selectedOrg.label : 'All Organizations'}</span>
+          <span className="font-mono">{selectedOrg ? selectedOrg.id : 'All Organizations'}</span>
           <ChevronDown size={13} style={{ color: '#64748b' }} />
         </button>
         {dropdownOpen && (
@@ -101,7 +101,8 @@ export function TopNav({ selectedOrgId, onOrgChange, searchQuery, onSearchChange
                   style={{ color: selectedOrgId === org.id ? '#60a5fa' : '#cbd5e1' }}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-blue-500/10 transition-colors"
                   onClick={() => { onOrgChange(org.id); setDropdownOpen(false); }}>
-                  {org.label}
+                  <div className="font-mono text-xs">{org.id}</div>
+                  <div style={{ color: '#64748b' }} className="text-xs truncate">{org.label}</div>
                 </button>
               ))
             )}
