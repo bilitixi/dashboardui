@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, Cell,
 } from 'recharts';
 import { useAlarmsSummary } from '../../hooks/useReports';
 
-interface Props { orgId: string; timeframeHours?: number; }
+interface Props { orgId: string; }
 
 const COLORS: Record<string, string> = {
   CRITICAL: '#ef4444',
@@ -13,8 +13,14 @@ const COLORS: Record<string, string> = {
   INFO:     '#3b82f6',
 };
 
-export function AlarmsSummaryChart({ orgId, timeframeHours = 24 }: Props) {
-  const { data, isLoading } = useAlarmsSummary(orgId, timeframeHours);
+const WINDOWS = [
+  { label: 'Last 24 hours', hours: 24 },
+  { label: 'Last 7 days',   hours: 168 },
+];
+
+export function AlarmsSummaryChart({ orgId }: Props) {
+  const [selectedHours, setSelectedHours] = useState(24);
+  const { data, isLoading } = useAlarmsSummary(orgId, selectedHours);
 
   const chartData = (data?.summary ?? []).map(s => ({
     severity: s.severity,
@@ -23,11 +29,29 @@ export function AlarmsSummaryChart({ orgId, timeframeHours = 24 }: Props) {
     total: s.total,
   }));
 
+  const selectedLabel = WINDOWS.find(w => w.hours === selectedHours)?.label ?? 'Last 24 hours';
+
   return (
     <div style={{ backgroundColor: '#1a2235', border: '1px solid #1e2d45' }} className="rounded-xl p-6">
       <div className="flex items-center justify-between mb-5">
         <span className="text-white font-semibold text-base">Alarms by severity</span>
-        <span style={{ color: '#64748b' }} className="text-xs">{timeframeHours}h window</span>
+        <select
+          value={selectedHours}
+          onChange={e => setSelectedHours(Number(e.target.value))}
+          style={{
+            backgroundColor: '#0f1520',
+            border: '1px solid #1e2d45',
+            color: '#94a3b8',
+            borderRadius: 8,
+            padding: '4px 10px',
+            fontSize: 12,
+            outline: 'none',
+            cursor: 'pointer',
+          }}>
+          {WINDOWS.map(w => (
+            <option key={w.hours} value={w.hours}>{w.label}</option>
+          ))}
+        </select>
       </div>
 
       {isLoading ? (
