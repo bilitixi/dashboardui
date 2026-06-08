@@ -15,8 +15,8 @@ const SEVERITY_COLORS: Record<string, string> = {
 };
 
 const STATUS_COLORS = {
-  Active:  '#f97316',
-  Cleared: '#22c55e',
+  Active:  '#ef4444',
+  Cleared: '#3b82f6',
 };
 
 const WINDOWS = [
