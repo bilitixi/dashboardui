@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, Upload, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { Download, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { useDevices } from '../../hooks/useDevices';
 import { useLocations } from '../../hooks/useLocations';
 import { Device } from '../../api/types';
@@ -96,10 +96,7 @@ export function UnitsTable({ orgId, searchQuery = '' }: Props) {
             )}
           </div>
 
-          <button style={{ backgroundColor: '#1a2235', border: '1px solid #1e2d45', color: '#cbd5e1' }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm hover:border-slate-500 transition-colors">
-            <Upload size={13} /> Import
-          </button>
+
           <button style={{ backgroundColor: '#1a2235', border: '1px solid #1e2d45', color: '#cbd5e1' }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm hover:border-slate-500 transition-colors">
             <Download size={13} /> Export
