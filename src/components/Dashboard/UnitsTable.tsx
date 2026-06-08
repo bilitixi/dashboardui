@@ -75,6 +75,7 @@ export function UnitsTable({ orgId, searchQuery = '' }: Props) {
             {locationDropdownOpen && (
               <div style={{ backgroundColor: '#131d2e', border: '1px solid #1e2d45' }}
                 className="absolute right-0 top-full mt-1 w-48 rounded-lg shadow-2xl z-50 overflow-hidden">
+                <div className="overflow-y-auto" style={{ maxHeight: 220 }}>
                 <button
                   style={{ color: !locationFilter ? '#60a5fa' : '#cbd5e1', borderBottom: '1px solid #1e2d45' }}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-blue-500/10 transition-colors"
@@ -90,6 +91,7 @@ export function UnitsTable({ orgId, searchQuery = '' }: Props) {
                     {loc.type && <div style={{ color: '#64748b' }} className="text-xs capitalize">{loc.type}</div>}
                   </button>
                 ))}
+                </div>
               </div>
             )}
           </div>
