@@ -5,9 +5,9 @@ import { OrgSyncStatus } from '../../api/types';
 import { useOrganizations } from '../../hooks/useOrganizations';
 
 function StatusIcon({ status }: { status: OrgSyncStatus['last_sync_status'] }) {
-  if (status === 'SUCCESS') return <CheckCircle size={16} style={{ color: '#22c55e' }} />;
-  if (status === 'FAILED')  return <XCircle size={16} style={{ color: '#ef4444' }} />;
-  return <Clock size={16} style={{ color: '#f59e0b' }} />;
+  if (status === 'SUCCESS') return <CheckCircle size={16} style={{ color: '#34d17e' }} />;
+  if (status === 'FAILED')  return <XCircle size={16} style={{ color: '#f1556a' }} />;
+  return <Clock size={16} style={{ color: '#f9a52e' }} />;
 }
 
 export function SyncStatusPanel() {
@@ -18,10 +18,10 @@ export function SyncStatusPanel() {
   const orgLabel = (id: string) => orgs.find(o => o.id === id)?.label ?? id;
 
   return (
-    <div style={{ backgroundColor: '#1a2235', border: '1px solid #1e2d45' }} className="rounded-xl p-6">
+    <div style={{ backgroundColor: '#13263f', border: '1px solid #27425f' }} className="rounded-xl p-6">
       <div className="flex items-center justify-between mb-5">
         <span className="text-white font-semibold text-base">Sync status</span>
-        <span style={{ color: '#64748b' }} className="text-xs flex items-center gap-1">
+        <span style={{ color: '#6c7f9c' }} className="text-xs flex items-center gap-1">
           <RefreshCw size={11} /> Auto-refreshes every 30s
         </span>
       </div>
@@ -29,24 +29,24 @@ export function SyncStatusPanel() {
       {isLoading ? (
         <div className="space-y-3">
           {[0, 1, 2].map(i => (
-            <div key={i} style={{ backgroundColor: '#253047' }} className="h-16 rounded-lg animate-pulse" />
+            <div key={i} style={{ backgroundColor: '#1c3252' }} className="h-16 rounded-lg animate-pulse" />
           ))}
         </div>
       ) : (data?.organizations ?? []).length === 0 ? (
-        <div style={{ color: '#64748b' }} className="text-center py-8 text-sm">No sync data available</div>
+        <div style={{ color: '#6c7f9c' }} className="text-center py-8 text-sm">No sync data available</div>
       ) : (
         <div className="space-y-3">
           {(data?.organizations ?? []).map(org => (
             <div key={org.organization_id}
-              style={{ backgroundColor: '#0f1520', border: '1px solid #1e2d45' }}
+              style={{ backgroundColor: '#0c1b30', border: '1px solid #27425f' }}
               className="rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <StatusIcon status={org.last_sync_status} />
                   <span className="text-sm font-medium text-white">{orgLabel(org.organization_id)}</span>
                   <span style={{
-                    backgroundColor: org.last_sync_status === 'SUCCESS' ? '#14291f' : org.last_sync_status === 'FAILED' ? '#2a1010' : '#2a1f0a',
-                    color: org.last_sync_status === 'SUCCESS' ? '#22c55e' : org.last_sync_status === 'FAILED' ? '#ef4444' : '#f59e0b',
+                    backgroundColor: org.last_sync_status === 'SUCCESS' ? '#091810' : org.last_sync_status === 'FAILED' ? '#1a0c10' : '#1a1404',
+                    color: org.last_sync_status === 'SUCCESS' ? '#34d17e' : org.last_sync_status === 'FAILED' ? '#f1556a' : '#f9a52e',
                   }} className="text-xs px-2 py-0.5 rounded-full font-medium">
                     {org.last_sync_status}
                   </span>
@@ -54,7 +54,7 @@ export function SyncStatusPanel() {
                 <button
                   onClick={() => syncMutation.mutate(org.organization_id)}
                   disabled={syncMutation.isPending}
-                  style={{ backgroundColor: '#1e3a5f', color: '#60a5fa', border: '1px solid #1e3a5f' }}
+                  style={{ backgroundColor: '#1c3252', color: '#4d8df5', border: '1px solid #1c3252' }}
                   className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium hover:brightness-125 disabled:opacity-50 transition-all">
                   <RefreshCw size={11} className={syncMutation.isPending ? 'animate-spin' : ''} />
                   Sync
@@ -68,19 +68,19 @@ export function SyncStatusPanel() {
                   { label: 'Sensors', value: org.sensor_offset },
                 ].map(item => (
                   <div key={item.label}>
-                    <div style={{ color: '#64748b' }}>{item.label} offset</div>
-                    <div style={{ color: '#94a3b8' }} className="font-mono font-medium">{item.value}</div>
+                    <div style={{ color: '#6c7f9c' }}>{item.label} offset</div>
+                    <div style={{ color: '#9fb2cd' }} className="font-mono font-medium">{item.value}</div>
                   </div>
                 ))}
               </div>
 
               {org.last_sync_time && (
-                <div style={{ color: '#64748b' }} className="text-xs mt-2">
+                <div style={{ color: '#6c7f9c' }} className="text-xs mt-2">
                   Last sync: {new Date(org.last_sync_time).toLocaleString()}
                 </div>
               )}
               {org.last_error_message && (
-                <div style={{ backgroundColor: '#2a1010', color: '#ef4444', border: '1px solid #ef444433' }}
+                <div style={{ backgroundColor: '#1a0c10', color: '#f1556a', border: '1px solid #f1556a33' }}
                   className="mt-2 text-xs px-3 py-2 rounded-lg">
                   {org.last_error_message}
                 </div>
