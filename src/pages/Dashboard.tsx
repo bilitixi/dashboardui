@@ -24,11 +24,11 @@ export default function Dashboard() {
 
   if (orgsLoading) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#0f1520' }}
+      <div style={{ minHeight: '100vh', backgroundColor: '#0c1b30' }}
         className="flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <div style={{ color: '#64748b' }} className="text-sm">Loading organizations...</div>
+          <div style={{ color: '#6c7f9c' }} className="text-sm">Loading organizations...</div>
         </div>
       </div>
     );
@@ -36,15 +36,15 @@ export default function Dashboard() {
 
   if (orgs.length === 0) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#0f1520' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: '#0c1b30' }}>
         <TopNav selectedOrgId="" onOrgChange={setSelectedOrgId} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
         <div className="flex flex-col items-center justify-center" style={{ minHeight: 'calc(100vh - 60px)' }}>
-          <div style={{ color: '#3b82f6', fontSize: 48 }} className="mb-4">⚡</div>
+          <div style={{ color: '#5b9dff', fontSize: 48 }} className="mb-4">⚡</div>
           <div className="text-white text-xl font-semibold mb-2">No organizations found</div>
-          <div style={{ color: '#64748b' }} className="text-sm text-center max-w-sm">
+          <div style={{ color: '#6c7f9c' }} className="text-sm text-center max-w-sm">
             Your database is empty. Run a bootstrap sync to fetch data from EcoStruxure.
           </div>
-          <code style={{ backgroundColor: '#1a2235', color: '#4ade80', border: '1px solid #1e2d45' }}
+          <code style={{ backgroundColor: '#13263f', color: '#34d17e', border: '1px solid #27425f' }}
             className="mt-4 px-4 py-2 rounded-lg text-sm font-mono">
             POST /api/sync/bootstrap
           </code>
@@ -54,7 +54,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0f1520' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0c1b30' }}>
       <TopNav
         selectedOrgId={selectedOrgId}
         onOrgChange={setSelectedOrgId}

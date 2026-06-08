@@ -8,15 +8,15 @@ import { useAlarmsSummary } from '../../hooks/useReports';
 interface Props { orgId: string; }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  CRITICAL: '#ef4444',
-  WARNING:  '#f59e0b',
-  INFO:     '#3b82f6',
-  OK:       '#22c55e',
+  CRITICAL: '#f1556a',
+  WARNING:  '#f9a52e',
+  INFO:     '#5b9dff',
+  OK:       '#34d17e',
 };
 
 const STATUS_COLORS = {
-  Active:  '#ef4444',
-  Cleared: '#3b82f6',
+  Active:  '#f1556a',
+  Cleared: '#5b9dff',
 };
 
 const WINDOWS = [
@@ -38,16 +38,16 @@ export function AlarmsSummaryChart({ orgId }: Props) {
   const selectedLabel = WINDOWS.find(w => w.hours === selectedHours)?.label ?? 'Last 24 hours';
 
   return (
-    <div style={{ backgroundColor: '#1a2235', border: '1px solid #1e2d45' }} className="rounded-xl p-6">
+    <div style={{ backgroundColor: '#13263f', border: '1px solid #27425f' }} className="rounded-xl p-6">
       <div className="flex items-center justify-between mb-5">
         <span className="text-white font-semibold text-base">Alarms by severity</span>
         <select
           value={selectedHours}
           onChange={e => setSelectedHours(Number(e.target.value))}
           style={{
-            backgroundColor: '#0f1520',
-            border: '1px solid #1e2d45',
-            color: '#94a3b8',
+            backgroundColor: '#0c1b30',
+            border: '1px solid #27425f',
+            color: '#9fb2cd',
             borderRadius: 8,
             padding: '4px 10px',
             fontSize: 12,
@@ -61,18 +61,18 @@ export function AlarmsSummaryChart({ orgId }: Props) {
       </div>
 
       {isLoading ? (
-        <div style={{ backgroundColor: '#253047' }} className="h-48 rounded animate-pulse" />
+        <div style={{ backgroundColor: '#1c3252' }} className="h-48 rounded animate-pulse" />
       ) : (
         <>
           <ResponsiveContainer width="100%" height={210}>
             <BarChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }} barSize={28}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#253047" vertical={false} />
-              <XAxis dataKey="severity" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1c3252" vertical={false} />
+              <XAxis dataKey="severity" tick={{ fill: '#9fb2cd', fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#9fb2cd', fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: '#1a2235', border: '1px solid #2a3548', borderRadius: 8 }}
-                labelStyle={{ color: '#e5e7eb', fontWeight: 600 }}
-                itemStyle={{ color: '#94a3b8' }}
+                contentStyle={{ background: '#13263f', border: '1px solid #27425f', borderRadius: 8 }}
+                labelStyle={{ color: '#eef3fb', fontWeight: 600 }}
+                itemStyle={{ color: '#9fb2cd' }}
               />
               <Bar dataKey="Active" stackId="a" radius={[0, 0, 0, 0]} fill={STATUS_COLORS.Active}>
                 {chartData.map(entry => (
@@ -86,7 +86,7 @@ export function AlarmsSummaryChart({ orgId }: Props) {
             {Object.entries(STATUS_COLORS).map(([label, color]) => (
               <div key={label} className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: color }} />
-                <span style={{ color: '#94a3b8' }} className="text-xs">{label}</span>
+                <span style={{ color: '#9fb2cd' }} className="text-xs">{label}</span>
               </div>
             ))}
           </div>
@@ -97,13 +97,13 @@ export function AlarmsSummaryChart({ orgId }: Props) {
       {!isLoading && (
         <div className="flex gap-3 mt-4">
           {(data?.summary ?? []).map(s => (
-            <div key={s.severity} style={{ backgroundColor: '#0f1520', border: `1px solid ${SEVERITY_COLORS[s.severity] ?? '#64748b'}33` }}
+            <div key={s.severity} style={{ backgroundColor: '#0c1b30', border: `1px solid ${SEVERITY_COLORS[s.severity] ?? '#6c7f9c'}33` }}
               className="flex-1 rounded-lg p-3 text-center">
-              <div className="text-xs font-medium mb-1" style={{ color: SEVERITY_COLORS[s.severity] ?? '#64748b' }}>{s.severity}</div>
+              <div className="text-xs font-medium mb-1" style={{ color: SEVERITY_COLORS[s.severity] ?? '#6c7f9c' }}>{s.severity}</div>
               <div className="text-2xl font-bold" style={{ color: STATUS_COLORS.Active }}>{s.active}</div>
               <div className="text-xs mt-0.5">
                 <span style={{ color: STATUS_COLORS.Cleared }}>{s.total - s.active} cleared</span>
-                <span style={{ color: '#3a4a5e' }}> / {s.total} total</span>
+                <span style={{ color: '#27425f' }}> / {s.total} total</span>
               </div>
             </div>
           ))}
