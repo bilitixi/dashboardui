@@ -17,14 +17,14 @@ const api = axios.create({ baseURL: BASE_URL, headers: { 'Content-Type': 'applic
 // ── Organizations ─────────────────────────────────────────────────────────────
 export async function fetchOrganizations(): Promise<Organization[]> {
   if (USE_MOCK) return mockOrganizations;
-  const { data } = await api.get<Organization[]>('/api/organizations');
+  const { data } = await api.get<Organization[]>('/api/ecostruxure/organizations');
   return data;
 }
 
 // ── Locations ─────────────────────────────────────────────────────────────────
 export async function fetchLocations(organization_id: string): Promise<Location[]> {
   if (USE_MOCK) return mockLocations.filter(l => l.organization_id === organization_id);
-  const { data } = await api.get<Location[]>('/api/locations', { params: { organization_id } });
+  const { data } = await api.get<Location[]>('/api/ecostruxure/locations', { params: { organization_id } });
   return data;
 }
 
@@ -38,7 +38,7 @@ export interface DeviceFilters {
 
 export async function fetchDevices(filters: DeviceFilters): Promise<PagedResponse<Device>> {
   if (USE_MOCK) return mockDevicesPage(filters.organization_id, filters.location_id, filters.limit, filters.offset);
-  const { data } = await api.get<PagedResponse<Device>>('/api/devices', { params: filters });
+  const { data } = await api.get<PagedResponse<Device>>('/api/ecostruxure/devices', { params: filters });
   return data;
 }
 
@@ -61,7 +61,7 @@ export async function fetchAlarms(filters: AlarmFilters): Promise<PagedResponse<
     const limit  = filters.limit  ?? 50;
     return { items: items.slice(offset, offset + limit), total: items.length, limit, offset };
   }
-  const { data } = await api.get<PagedResponse<Alarm>>('/api/alarms', { params: filters });
+  const { data } = await api.get<PagedResponse<Alarm>>('/api/ecostruxure/alarms', { params: filters });
   return data;
 }
 
@@ -70,7 +70,7 @@ export async function fetchAlarmsSummary(
   organization_id: string, timeframe_hours = 24
 ): Promise<AlarmsSummaryReport> {
   if (USE_MOCK) return mockAlarmsSummary(organization_id);
-  const { data } = await api.get<AlarmsSummaryReport>('/api/reports/alarms-summary', {
+  const { data } = await api.get<AlarmsSummaryReport>('/api/ecostruxure/reports/alarms-summary', {
     params: { organization_id, timeframe_hours },
   });
   return data;
@@ -78,7 +78,7 @@ export async function fetchAlarmsSummary(
 
 export async function fetchDeviceHealth(organization_id: string): Promise<DeviceHealthReport> {
   if (USE_MOCK) return mockDeviceHealth(organization_id);
-  const { data } = await api.get<DeviceHealthReport>('/api/reports/device-health', {
+  const { data } = await api.get<DeviceHealthReport>('/api/ecostruxure/reports/device-health', {
     params: { organization_id },
   });
   return data;
@@ -92,25 +92,25 @@ export interface PowerUsageFilters {
 
 export async function fetchPowerUsage(filters: PowerUsageFilters): Promise<PowerUsageReport> {
   if (USE_MOCK) return mockPowerUsage(filters.organization_id);
-  const { data } = await api.get<PowerUsageReport>('/api/reports/power-usage', { params: filters });
+  const { data } = await api.get<PowerUsageReport>('/api/ecostruxure/reports/power-usage', { params: filters });
   return data;
 }
 
 // ── Sync ──────────────────────────────────────────────────────────────────────
 export async function fetchSyncStatus(): Promise<SyncStatusResponse> {
   if (USE_MOCK) return mockSyncStatus;
-  const { data } = await api.get<SyncStatusResponse>('/api/sync/status');
+  const { data } = await api.get<SyncStatusResponse>('/api/ecostruxure/sync/status');
   return data;
 }
 
 export async function triggerBootstrap(): Promise<{ status: string }> {
   if (USE_MOCK) return { status: 'bootstrap_started' };
-  const { data } = await api.post<{ status: string }>('/api/sync/bootstrap');
+  const { data } = await api.post<{ status: string }>('/api/ecostruxure/sync/bootstrap');
   return data;
 }
 
 export async function triggerIncrementalSync(org_id: string): Promise<{ status: string }> {
   if (USE_MOCK) return { status: 'incremental_sync_started' };
-  const { data } = await api.post<{ status: string }>(`/api/sync/incremental/${org_id}`);
+  const { data } = await api.post<{ status: string }>(`/api/ecostruxure/sync/incremental/${org_id}`);
   return data;
 }
